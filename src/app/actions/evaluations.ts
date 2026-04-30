@@ -64,7 +64,7 @@ export async function createEvaluationAction(
 
   revalidatePath("/dashboard");
   revalidatePath("/evaluations");
-  redirect(`/evaluations/${created.id}`);
+  return redirect(`/evaluations/${created.id}`);
 }
 
 export async function updateEvaluationAction(
@@ -117,7 +117,7 @@ export async function updateEvaluationAction(
   revalidatePath("/dashboard");
   revalidatePath("/evaluations");
   revalidatePath(`/evaluations/${updated.id}`);
-  redirect(`/evaluations/${updated.id}`);
+  return redirect(`/evaluations/${updated.id}`);
 }
 
 export async function deleteEvaluationAction(id: string): Promise<ActionResult> {
@@ -133,7 +133,7 @@ export async function deleteEvaluationAction(id: string): Promise<ActionResult> 
 
   revalidatePath("/dashboard");
   revalidatePath("/evaluations");
-  redirect("/evaluations");
+  return redirect("/evaluations");
 }
 
 export async function rescheduleEvaluationAction(

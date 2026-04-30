@@ -43,8 +43,10 @@ export async function loginAction(
     name: user.name,
     role: user.role,
   });
+
+  // setSessionCookie must complete before redirect throws NEXT_REDIRECT
   await setSessionCookie(token);
-  redirect("/dashboard");
+  return redirect("/dashboard");
 }
 
 export async function registerAction(
@@ -81,11 +83,12 @@ export async function registerAction(
     name: user.name,
     role: user.role,
   });
+
   await setSessionCookie(token);
-  redirect("/dashboard");
+  return redirect("/dashboard");
 }
 
 export async function logoutAction() {
   await clearSessionCookie();
-  redirect("/login");
+  return redirect("/login");
 }
