@@ -1,0 +1,81 @@
+// Prisma schema — Sistema de Gestão de Avaliações de Pulso Educacional
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EvaluationStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  RESCHEDULED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  evaluations      Evaluation[]
+  evaluationEvents EvaluationEvent[]
+
+  @@map("users")
+}
+
+model Evaluation {
+  id               String           @id @default(uuid()) @db.Uuid
+  userId           String           @map("user_id") @db.Uuid
+  schoolName       String           @map("school_name")
+  region           String
+  location         String
+  evaluationName   String           @map("evaluation_name")
+  datetime         DateTime
+  status           EvaluationStatus @default(SCHEDULED)
+  rescheduleReason String?          @map("reschedule_reason")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  user   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events EvaluationEvent[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([region])
+  @@index([schoolName])
+  @@index([datetime])
+  @@map("evaluations")
+}
+
+// Audit log of changes (status transitions, reschedules, edits)
+model EvaluationEvent {
+  id           String           @id @default(uuid()) @db.Uuid
+  evaluationId String           @map("evaluation_id") @db.Uuid
+  actorId      String           @map("actor_id") @db.Uuid
+  action       String
+  fromStatus   EvaluationStatus? @map("from_status")
+  toStatus     EvaluationStatus? @map("to_status")
+  reason       String?
+  metadata     Json?
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  actor      User       @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([evaluationId])
+  @@index([actorId])
+  @@map("evaluation_events")
+}
