@@ -20,9 +20,9 @@ export type SessionPayload = {
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET;
-  if (!secret || secret.length < 16) {
+  if (!secret) {
     throw new Error(
-      "AUTH_SECRET ausente ou curto demais. Defina-o em .env (>= 16 chars).",
+      "AUTH_SECRET não definido. Adicione esta variável de ambiente na Vercel.",
     );
   }
   return new TextEncoder().encode(secret);
