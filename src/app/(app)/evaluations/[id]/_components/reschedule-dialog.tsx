@@ -66,7 +66,7 @@ export function RescheduleDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="secondary">
-          <CalendarClock />
+          <CalendarClock className="h-4 w-4" />
           Reagendar
         </Button>
       </DialogTrigger>

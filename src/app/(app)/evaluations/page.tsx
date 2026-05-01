@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { requireSession } from "@/lib/auth";
 import { listEvaluations, STATUS_OPTIONS } from "@/lib/evaluations";
 import { evaluationFiltersSchema } from "@/lib/validators";
+import { listUsersForAssign } from "@/app/actions/assign";
 import { Button } from "@/components/ui/button";
 import { EvaluationsFilters } from "@/app/(app)/evaluations/_components/filters";
 import { EvaluationsTable } from "@/app/(app)/evaluations/_components/evaluations-table";
@@ -30,10 +31,10 @@ export default async function EvaluationsPage({
 }) {
   const session = await requireSession();
   const filters = evaluationFiltersSchema.parse(flattenParams(searchParams));
-  const { items, total, page, totalPages, pageSize } = await listEvaluations(
-    session,
-    filters,
-  );
+  const [{ items, total, page, totalPages, pageSize }, users] = await Promise.all([
+    listEvaluations(session, filters),
+    session.role === "ADMIN" ? listUsersForAssign() : Promise.resolve([]),
+  ]);
 
   const exportQuery = new URLSearchParams();
   if (filters.q) exportQuery.set("q", filters.q);
@@ -60,12 +61,12 @@ export default async function EvaluationsPage({
             )}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <ExportMenu query={exportQuery.toString()} disabled={total === 0} />
-          <Button asChild size="sm">
+          <Button asChild>
             <Link href="/evaluations/new">
               <Plus className="h-4 w-4" />
-              Nova
+              Nova avaliação
             </Link>
           </Button>
         </div>
@@ -83,7 +84,11 @@ export default async function EvaluationsPage({
       />
 
       {/* Table */}
-      <EvaluationsTable items={items} showOwnerColumn={session.role === "ADMIN"} />
+      <EvaluationsTable
+        items={items}
+        showOwnerColumn={session.role === "ADMIN"}
+        users={users}
+      />
 
       {/* Pagination */}
       <Pagination page={page} pageSize={pageSize} totalPages={totalPages} total={total} />

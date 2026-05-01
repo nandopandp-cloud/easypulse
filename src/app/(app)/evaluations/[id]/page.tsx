@@ -39,12 +39,12 @@ export default async function EvaluationDetailPage({
             Avaliações
           </Link>
         </Button>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <RescheduleDialog
             id={evaluation.id}
             currentDatetime={evaluation.datetime.toISOString()}
           />
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline">
             <Link href={`/evaluations/${evaluation.id}/edit`}>
               <Pencil className="h-4 w-4" />
               Editar

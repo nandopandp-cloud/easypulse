@@ -34,7 +34,7 @@ export function DeleteEvaluationButton({ id }: { id: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="destructive">
-          <Trash2 />
+          <Trash2 className="h-4 w-4" />
           Excluir
         </Button>
       </DialogTrigger>
@@ -58,7 +58,7 @@ export function DeleteEvaluationButton({ id }: { id: string }) {
             disabled={pending}
             type="button"
           >
-            {pending ? <Loader2 className="animate-spin" /> : <Trash2 />}
+            {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             {pending ? "Excluindo..." : "Sim, excluir"}
           </Button>
         </DialogFooter>

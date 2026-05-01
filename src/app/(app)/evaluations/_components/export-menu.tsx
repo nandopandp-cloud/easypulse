@@ -23,8 +23,8 @@ export function ExportMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" disabled={disabled}>
-          <Download />
+        <Button variant="outline" size="default" disabled={disabled}>
+          <Download className="h-4 w-4" />
           Exportar
         </Button>
       </DropdownMenuTrigger>
