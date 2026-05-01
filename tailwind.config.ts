@@ -6,10 +6,8 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: "1rem",
-      screens: {
-        "2xl": "1280px",
-      },
+      padding: { DEFAULT: "1rem", sm: "1.5rem", lg: "2rem" },
+      screens: { "2xl": "1400px" },
     },
     extend: {
       colors: {
@@ -35,7 +33,7 @@ const config: Config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
+          DEFAULT: "hsl(var(--accent-foreground) / 0.08)",
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
@@ -54,11 +52,30 @@ const config: Config = {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          muted: "hsl(var(--sidebar-muted))",
+          "muted-foreground": "hsl(var(--sidebar-muted-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          border: "hsl(var(--sidebar-border))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
+      },
+      boxShadow: {
+        xs: "var(--shadow-xs)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
@@ -69,13 +86,13 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        shimmer: {
-          "100%": { transform: "translateX(100%)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      transitionTimingFunction: {
+        spring: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
     },
   },

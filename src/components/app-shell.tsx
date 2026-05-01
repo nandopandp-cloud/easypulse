@@ -8,23 +8,13 @@ import {
   ClipboardList,
   LayoutDashboard,
   LogOut,
-  Menu,
   Plus,
-  X,
+  Settings,
 } from "lucide-react";
 
 import { logoutAction } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { SessionPayload } from "@/lib/auth";
 
@@ -42,6 +32,41 @@ function initials(name: string) {
     .join("");
 }
 
+function NavLink({
+  href,
+  icon: Icon,
+  label,
+  active,
+}: {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "sidebar-item group relative",
+        active
+          ? "bg-sidebar-muted text-sidebar-foreground"
+          : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground",
+      )}
+    >
+      {active && (
+        <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-sidebar-accent" />
+      )}
+      <Icon
+        className={cn(
+          "h-4 w-4 shrink-0 transition-colors",
+          active ? "text-sidebar-accent" : "group-hover:text-sidebar-foreground",
+        )}
+      />
+      {label}
+    </Link>
+  );
+}
+
 export function AppShell({
   session,
   children,
@@ -50,134 +75,165 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   return (
-    <div className="min-h-dvh bg-background">
-      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
-            >
-              {mobileOpen ? <X /> : <Menu />}
-            </Button>
-            <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-              <span className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
-                <Activity className="h-5 w-5" />
-              </span>
-              <span className="hidden sm:block">EasyPulse</span>
-            </Link>
-            <nav className="ml-6 hidden items-center gap-1 md:flex">
-              {NAV.map((item) => {
-                const active =
-                  pathname === item.href || pathname.startsWith(item.href + "/");
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-accent text-accent-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    )}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
+    <div className="flex min-h-dvh bg-background">
+      {/* ── Desktop Sidebar ─────────────────────────── */}
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-sidebar-border bg-sidebar md:flex">
+        {/* Logo */}
+        <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-5">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sidebar-accent">
+            <Activity className="h-4 w-4 text-white" />
+          </span>
+          <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
+            EasyPulse
+          </span>
+          <Badge
+            variant="secondary"
+            className="ml-auto bg-sidebar-muted text-[10px] text-sidebar-muted-foreground"
+          >
+            {session.role === "ADMIN" ? "Admin" : "User"}
+          </Badge>
+        </div>
 
-          <div className="flex items-center gap-2">
-            <Button asChild size="sm" className="hidden sm:inline-flex">
-              <Link href="/evaluations/new">
-                <Plus />
-                Nova avaliação
-              </Link>
-            </Button>
+        {/* Nav */}
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+          <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">
+            Menu
+          </p>
+          {NAV.map((item) => {
+            const active =
+              pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={active}
+              />
+            );
+          })}
+
+          <div className="my-2 border-t border-sidebar-border" />
+          <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted-foreground">
+            Ações
+          </p>
+          <Link
+            href="/evaluations/new"
+            className={cn(
+              "sidebar-item",
+              pathname === "/evaluations/new"
+                ? "bg-sidebar-accent text-white"
+                : "bg-sidebar-accent/10 text-sidebar-accent hover:bg-sidebar-accent hover:text-white",
+            )}
+          >
+            <Plus className="h-4 w-4" />
+            Nova avaliação
+          </Link>
+        </nav>
+
+        {/* Footer */}
+        <div className="border-t border-sidebar-border p-3">
+          <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sidebar-muted text-xs font-semibold text-sidebar-foreground">
+              {initials(session.name)}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium text-sidebar-foreground">
+                {session.name}
+              </p>
+              <p className="truncate text-[10px] text-sidebar-muted-foreground">
+                {session.email}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 px-1">
             <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 px-2">
-                  <span className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                    {initials(session.name)}
-                  </span>
-                  <span className="hidden text-sm md:block">{session.name}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{session.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {session.email}
-                    </span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                  Perfil:{" "}
-                  <Badge variant={session.role === "ADMIN" ? "default" : "secondary"}>
-                    {session.role === "ADMIN" ? "Administrador" : "Usuário"}
-                  </Badge>
-                </div>
-                <DropdownMenuSeparator />
-                <form action={logoutAction}>
-                  <DropdownMenuItem asChild>
-                    <button type="submit" className="w-full text-left">
-                      <LogOut className="h-4 w-4" />
-                      Sair
-                    </button>
-                  </DropdownMenuItem>
-                </form>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <form action={logoutAction} className="flex-1">
+              <button
+                type="submit"
+                className="sidebar-item w-full text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                Sair
+              </button>
+            </form>
           </div>
         </div>
-        {mobileOpen ? (
-          <nav className="container flex flex-col gap-1 pb-4 md:hidden">
-            {NAV.map((item) => {
-              const active =
-                pathname === item.href || pathname.startsWith(item.href + "/");
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
-                    active
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent",
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-            <Link
-              href="/evaluations/new"
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-            >
-              <Plus className="h-4 w-4" />
-              Nova avaliação
-            </Link>
-          </nav>
-        ) : null}
-      </header>
+      </aside>
 
-      <main className="container py-6 md:py-10">{children}</main>
+      {/* ── Main content ────────────────────────────── */}
+      <div className="flex min-w-0 flex-1 flex-col md:pl-60">
+        {/* Mobile top bar */}
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur md:hidden">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <span className="grid h-7 w-7 place-items-center rounded-md bg-primary">
+              <Activity className="h-4 w-4 text-primary-foreground" />
+            </span>
+            <span className="text-sm font-semibold">EasyPulse</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+              {initials(session.name)}
+            </span>
+          </div>
+        </header>
+
+        <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
+          <div className="page-enter mx-auto max-w-5xl">
+            {children}
+          </div>
+        </main>
+
+        {/* Mobile bottom nav */}
+        <nav className="fixed bottom-0 inset-x-0 z-30 flex h-16 items-center justify-around border-t bg-background/95 backdrop-blur md:hidden">
+          {NAV.map((item) => {
+            const active =
+              pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center gap-1 px-4 py-2 text-[10px] font-medium transition-colors",
+                  active ? "text-primary" : "text-muted-foreground",
+                )}
+              >
+                <item.icon
+                  className={cn(
+                    "h-5 w-5 transition-transform",
+                    active && "scale-110",
+                  )}
+                />
+                {item.label}
+              </Link>
+            );
+          })}
+          <Link
+            href="/evaluations/new"
+            className="flex flex-col items-center gap-1 px-4 py-2 text-[10px] font-medium text-muted-foreground transition-colors"
+          >
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-primary">
+              <Plus className="h-3.5 w-3.5 text-white" />
+            </span>
+            Novo
+          </Link>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="flex flex-col items-center gap-1 px-4 py-2 text-[10px] font-medium text-muted-foreground"
+            >
+              <LogOut className="h-5 w-5" />
+              Sair
+            </button>
+          </form>
+        </nav>
+
+        {/* Mobile bottom padding to avoid nav overlap */}
+        <div className="h-16 md:hidden" />
+      </div>
     </div>
   );
 }
